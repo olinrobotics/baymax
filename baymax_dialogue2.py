@@ -20,6 +20,8 @@ print patient_status
 sid = SentimentIntensityAnalyzer()
 patient_sentiment = sid.polarity_scores(patient_status)
 
+print patient_sentiment
+
 if patient_sentiment['pos'] > patient_sentiment['neg']:
     print "That's good!"
 else:
