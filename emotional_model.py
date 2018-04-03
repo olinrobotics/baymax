@@ -1,5 +1,5 @@
 import pickle
-import os path
+import os.path
 
 from em_r_novelty import *
 from em_relevance import *
@@ -21,11 +21,20 @@ class Emotion:
     def load_variables(self):
         '''load pickle file with internal variables and store in attribute
         self.internal_variables'''
-        self.internal_variables = pickle.load(open('internal_variables.p','rb'))
+        if os.path.exists('internal_variables.p'):
+            self.internal_variables = pickle.load(open('internal_variables.p','rb'))
+        else:
+            blank_sent = {'neg': 0, 'pos':0, 'neu':0, 'compound': 0}
+            universal_variables = {'last_sent': blank_sent,
+                                   'delta_sent': blank_sent}
+            user_variables = {}
+            self.internal_variables = []
 
     def store_variables(self):
         '''store internal_variables in pickle file'''
-        pickle.dump
+        # TODO:  analysis of sent and user
+        # store in pickle file
+        pickle.dump(self.internal_variables, open('internal_variables.py', 'wb'))
 
     def code_criteria(self, pos):
         '''Constructs dictionary of emotion critera
@@ -35,7 +44,7 @@ class Emotion:
         output:
             em_critera: dictionary with critera as keys'''
 
-        # calculate values fo
+        # calculate values for critera
         pleasantness = self.pl.calculate(pos)
 
         # create em_critera dictionary
