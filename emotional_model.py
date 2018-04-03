@@ -6,10 +6,23 @@ from em_relevance import *
 from em_implication import *
 
 class Emotion:
-    def __init__(self):
+    def __init__(self, user_name, user_sent):
+        self.user_name = user_name
+        self.user_sent = user_sent
+
+        self.blank_sent = {'neg': 0, 'pos':0, 'neu':0, 'compound': 0}
+        # note: delta_sent is last delta_sent, new one will have to be calculated
+        self.blank_variables = {'current_sent': self.user_sent,
+                                'last_sent': self.blank_sent,
+                                'delta_sent': self.blank_sent,
+                                'average_sent': self.blank_sent,
+                                'average_delta': self.blank_sent}
         self.load_variables()
 
-        # self.s = Suddenness()
+        default_thres = [.2, .4, .6, .8]
+        self.thresholds = {'suddenness': default_thres}
+
+        self.s = Suddenness(self.internal_variables, self.thresholds['suddenness'])
         # self.f = Familiarity()
         # self.p = Predictability()
         self.pl = Pleasantness()
@@ -21,14 +34,21 @@ class Emotion:
     def load_variables(self):
         '''load pickle file with internal variables and store in attribute
         self.internal_variables'''
+        # Load variables
         if os.path.exists('internal_variables.p'):
             self.internal_variables = pickle.load(open('internal_variables.p','rb'))
         else:
-            blank_sent = {'neg': 0, 'pos':0, 'neu':0, 'compound': 0}
-            universal_variables = {'last_sent': blank_sent,
-                                   'delta_sent': blank_sent}
+            universal_variables = self.blank_variables
             user_variables = {}
-            self.internal_variables = []
+            self.internal_variables = [universal_variables, user_variables]
+
+        # add current variables to internal_variables
+        self.internal_variables[0]['current_sent'] = self.user_sent
+        # check if user is in database, if not, make new user
+        if self.user_name in self.internal_variables[1]:
+            self.internal_variables[1][self.user_name]['current_sent'] = self.user_sent
+        else:
+            self.internal_variables[1][self.user_name] = self.blank_variables
 
     def store_variables(self):
         '''store internal_variables in pickle file'''
@@ -36,7 +56,7 @@ class Emotion:
         # store in pickle file
         pickle.dump(self.internal_variables, open('internal_variables.py', 'wb'))
 
-    def code_criteria(self, pos):
+    def code_criteria(self):
         '''Constructs dictionary of emotion critera
         inputs:
             pos: positivity from nltk sentiment analysis,
@@ -45,10 +65,10 @@ class Emotion:
             em_critera: dictionary with critera as keys'''
 
         # calculate values for critera
-        pleasantness = self.pl.calculate(pos)
+        suddenness = self.s.code()
 
         # create em_critera dictionary
-        self.em_critera = {'pleasantness': pleasantness}
+        self.em_critera = {'suddenness': suddenness}
 
         return self.em_critera
 
@@ -56,6 +76,25 @@ class Emotion:
         pass
 
 if __name__ == "__main__":
-    model = Emotion()
-    em_critera = model.code_criteria(.8)
+    import nltk
+    nltk.download('vader_lexicon')
+    from nltk.sentiment.vader import SentimentIntensityAnalyzer
+
+    print "Hello, I'm Baymax, your personal healthcare companion"
+
+    # Ask the patient for their name
+    patient_name = raw_input("Who are you? ")
+    print "Hello, %s!" % patient_name
+
+    # Ask the patient how they are
+    patient_status = raw_input("How are you today? ")
+    print patient_status
+
+    # Sentiment analysis proof of concept
+    sid = SentimentIntensityAnalyzer()
+    patient_sentiment = sid.polarity_scores(patient_status)
+
+    model = Emotion(patient_name, patient_sentiment)
+    em_critera = model.code_criteria()
+    print model.internal_variables
     print em_critera

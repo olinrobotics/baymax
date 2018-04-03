@@ -37,8 +37,9 @@ class TestCalculation(unittest.TestCase):
 
 
 class Criterium:
-    def __init__(self):
-        pass
+    def __init__(self, internal_variables, thresholds):
+        self.internal_variables = internal_variables
+        self.thresholds = thresholds
 
     def calculate(self, val, thresholds=[.2, .4, .6, .8]):
         # threshold between very low and low
