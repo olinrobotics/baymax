@@ -41,8 +41,9 @@ class Emotion:
 
     def load_pickle_file(self):
         # Load variables
-        if os.path.exists('internal_variables.p'):
-            self.internal_variables = pickle.load(open('internal_variables.p','rb'))
+        if os.path.exists('internal_variables.pickle'):
+            self.internal_variables = pickle.load(open('internal_variables.pickle',
+                                                        'rb'))
         else:
             universal_variables = self.blank_variables
             user_variables = {}
@@ -52,9 +53,10 @@ class Emotion:
         '''store internal_variables in pickle file'''
         # TODO:  analysis of sent and user
         # store in pickle file
-        self.add_variables_end(self.internal_variables[0])
-        self.add_variables_end(self.internal_variables[1][self.user_name])
-        pickle.dump(self.internal_variables, open('internal_variables.py', 'wb'))
+        self.internal_variables[0] = self.add_variables_end(self.internal_variables[0])
+        self.internal_variables[1][self.user_name] = self.add_variables_end(self.internal_variables[1][self.user_name])
+        pickel_out = open('internal_variables.pickle', 'wb')
+        pickle.dump(model.internal_variables, pickel_out)
 
     def add_universal_variables(self):
         # update universal_variables
@@ -106,11 +108,14 @@ class Emotion:
 
         # changes current_sent to blank_sent
         variable_dict['current_sent'] = self.blank_sent
+        print 'current_sent cleared'
 
         # update average_delta
         self.average_sent(variable_dict['delta_sent'],
                           variable_dict['average_delta'],
                           variable_dict['num_data'] - 1)
+
+        return variable_dict
 
     def average_sent(self, current, average, num_data):
         '''Updates the average_sent given variable_dict'''
@@ -178,5 +183,7 @@ if __name__ == "__main__":
 
     model = Emotion(patient_name, patient_sentiment)
     em_critera = model.code_criteria()
+
+
 
     print em_critera
