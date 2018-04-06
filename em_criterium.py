@@ -69,5 +69,6 @@ class Criterium:
                     else:
                         return 'very high'
 
+
 if __name__ == "__main__":
     unittest.main()
