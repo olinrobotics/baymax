@@ -26,8 +26,24 @@ class Suddenness(Criterium):
 
 
 class Familiarity(Criterium):
+    def __init__(self, internal_variables, thresholds):
+        self.internal_variables = internal_variables
+        self.thresholds = thresholds
+
     def code(self):
-        pass
+        # define average compound score
+        average_compound = self.internal_variables[0]['average_sent']['compound']
+
+        # define current compound score
+        current_compound = self.internal_variables[0]['current_sent']['compound']
+
+        # define change as absolute value of difference
+        delta_compound = abs(average_compound - current_compound)
+
+        # calculate familiarity as very low, low, medium, high, or very high
+        familiarity = self.reverse_calculate(delta_compound, self.thresholds)
+
+        return familiarity
 
 
 class Predictability(Criterium):
@@ -41,12 +57,12 @@ class Predictability(Criterium):
         average_compound = self.internal_variables[1][self.user_name]['average_sent']['compound']
 
         # define current compound score
-        current_compound = self.internal_variables[0]['current_sent']
+        current_compound = self.internal_variables[0]['current_sent']['compound']
 
         # defines change as absolute value of difference
         delta_compound = abs(average_compound - current_compound)
 
         # calculate predictability as very low, low, medium, high, or very high
-        predictability = self.calculate(delta_compound, self.thresholds)
+        predictability = self.reverse_calculate(delta_compound, self.thresholds)
 
         return predictability

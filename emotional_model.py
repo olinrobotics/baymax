@@ -15,16 +15,26 @@ class Emotion:
         self.blank_variables = {'current_sent': self.blank_sent,
                                 'last_sent': self.blank_sent,
                                 'delta_sent': self.blank_sent,
+                                'sum_sent': self.blank_sent,
+                                'sum_delta': self.blank_sent,
                                 'average_sent': self.blank_sent,
                                 'average_delta': self.blank_sent,
                                 'num_data': 0}
         self.load_variables()
 
         default_thres = [.2, .4, .6, .8]
-        self.thresholds = {'suddenness': default_thres}
-        self.s = Suddenness(self.internal_variables, self.thresholds['suddenness'])
-        # self.f = Familiarity()
-        self.p = Predictability()
+        self.thresholds = {'suddenness': default_thres,
+                           'familiarity': default_thres,
+                           'predictability': default_thres,
+                           }
+
+        self.s = Suddenness(self.internal_variables,
+                            self.thresholds['suddenness'])
+        self.f = Familiarity(self.internal_variables,
+                             self.thresholds['familiarity'])
+        self.p = Predictability(self.internal_variables,
+                                self.thresholds['predictability'],
+                                self.user_name)
         self.pl = Pleasantness()
         # self.gr = Goal_Relevance()
         # self.cm = Cause_Motive()
@@ -34,20 +44,21 @@ class Emotion:
     def load_variables(self):
         '''load pickle file with internal variables and store in attribute
         self.internal_variables'''
-        self.load_pickle_file()
+        self.load_pickle_file(True)
         self.add_universal_variables()
         self.add_user_variables()
-        print self.internal_variables
 
-    def load_pickle_file(self):
+    def load_pickle_file(self, overwrite=False):
         # Load variables
-        if os.path.exists('internal_variables.pickle'):
+        if os.path.exists('internal_variables.pickle') and overwrite == False:
             self.internal_variables = pickle.load(open('internal_variables.pickle',
                                                         'rb'))
         else:
             universal_variables = self.blank_variables
             user_variables = {}
             self.internal_variables = [universal_variables, user_variables]
+
+        print self.internal_variables
 
     def store_pickle_file(self):
         '''store internal_variables in pickle file'''
@@ -65,18 +76,11 @@ class Emotion:
         universal_variables['current_sent'] = self.user_sent
         universal_variables['num_data'] += 1
 
-        # update average sentiment
-        current = universal_variables['current_sent']
-        average = universal_variables['average_sent']
-        num = universal_variables['num_data']
-        universal_variables['average_sent'] = self.average_sent(current,
-                                                                average, num)
         self.internal_variables[0] = universal_variables
 
     def add_user_variables(self):
-        overwrite = False
         # check if user is in database, if not, make new user
-        if self.user_name not in self.internal_variables[1] or overwrite:
+        if self.user_name not in self.internal_variables[1]:
             self.internal_variables[1][self.user_name] = self.blank_variables
 
         # update user variables
@@ -86,9 +90,14 @@ class Emotion:
         user_variables['num_data'] += 1
 
         # update average sentiment
-        user_variables['average_sent'] = self.average_sent(user_variables['current_sent'],
-                                                           user_variables['average_sent'],
-                                                           user_variables['num_data'])
+        current = user_variables['current_sent']
+        average = user_variables['average_sent']
+        num = user_variables['num_data']
+        sum_ = user_variables['sum_sent']
+
+        user_variables['sum_sent'] = self.sum_sent(current, sum_)
+
+        user_variables['average_sent'] = self.average_sent(current, average, num)
 
         self.internal_variables[1][self.user_name] = user_variables
 
@@ -99,46 +108,64 @@ class Emotion:
             - changes current_sent to blank_sent
             - update average_delta
         '''
+
+        # update average sentiment
+        current = variable_dict['current_sent']
+        last = variable_dict['last_sent']
+        average = variable_dict['average_sent']
+        num = variable_dict['num_data']
+        sum_ = variable_dict['sum_sent']
+
         # store difference between current_sent and last_sent
-        variable_dict['delta_sent'] = self.diff_sent(variable_dict['current_sent'],
-                                                     variable_dict['last_sent'])
+        variable_dict['delta_sent'] = self.diff_sent(current, last)
+
+        # update sum
+        variable_dict['sum_sent'] = self.sum_sent(current, sum_)
+        sum_ =  variable_dict['sum_sent']
+
+        # update average
+        variable_dict['average_sent'] = self.average_sent(current, sum_, num)
 
         # store current_sent as last_sent
         variable_dict['last_sent'] = variable_dict['current_sent']
 
         # changes current_sent to blank_sent
         variable_dict['current_sent'] = self.blank_sent
-        print 'current_sent cleared'
-
-        # update average_delta
-        self.average_sent(variable_dict['delta_sent'],
-                          variable_dict['average_delta'],
-                          variable_dict['num_data'] - 1)
 
         return variable_dict
 
-    def average_sent(self, current, average, num_data):
+    def average_sent(self, current, sum_, num_data):
         '''Updates the average_sent given variable_dict'''
-        # TODO: change the parameters to two sentiment dictionaries?
-        average['pos'] = (average['pos'] + current['pos'])/num_data
+        # TODO: correct math using sum instead of average
+        average = self.blank_sent
+        print num_data
+        average['pos'] = sum_['pos']/num_data
 
-        average['neg'] = (average['neg'] + current['neg'])/num_data
+        average['neg'] = sum_['neg']/num_data
 
-        average['neu'] = (average['neu'] + average['neu'])/num_data
+        average['neu'] = sum_['neu']/num_data
 
-        average['compound'] = (average['compound'] +
-                               current['compound'])/num_data
+        average['compound'] = sum_['compound']/num_data
 
         return average
 
-    def diff_sent(self, current_sent, last_sent):
+    def diff_sent(self, current, last):
         '''Takes difference of two different sentiment dictionaries'''
         diff = {}
-        diff['pos'] = last_sent['pos'] - current_sent['pos']
-        diff['neg'] = last_sent['neg'] - current_sent['neg']
-        diff['neu'] = last_sent['neu'] - current_sent['neu']
-        diff['compound'] = last_sent['compound'] - current_sent['compound']
+        diff['pos'] = last['pos'] - current['pos']
+        diff['neg'] = last['neg'] - current['neg']
+        diff['neu'] = last['neu'] - current['neu']
+        diff['compound'] = last['compound'] - current['compound']
+
         return diff
+
+    def sum_sent(self, current, sum_):
+        sum_['pos'] += current['pos']
+        sum_['neg'] += current['neg']
+        sum_['neu'] += current['neu']
+        sum_['compound'] += current['compound']
+
+        return sum_
 
     def code_criteria(self):
         '''Constructs dictionary of emotion critera
@@ -150,12 +177,15 @@ class Emotion:
 
         # calculate values for critera
         predictability = self.p.code()
+        familiarity = self.f.code()
         suddenness = self.s.code()
 
         # create em_critera dictionary
         self.em_critera = {'predictability': predictability,
+                           'familiarity': familiarity,
                            'suddenness': suddenness}
 
+        print self.internal_variables
         # store internal_variables in pickle file
         model.store_pickle_file()
 
@@ -177,7 +207,6 @@ if __name__ == "__main__":
 
     # Ask the patient how they are
     patient_status = raw_input("How are you today? ")
-    print patient_status
 
     # Sentiment analysis proof of concept
     sid = SentimentIntensityAnalyzer()
@@ -185,7 +214,6 @@ if __name__ == "__main__":
 
     model = Emotion(patient_name, patient_sentiment)
     em_critera = model.code_criteria()
-
 
 
     print em_critera

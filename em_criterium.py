@@ -54,7 +54,7 @@ class TestReverseCalculation(unittest.TestCase):
                                 'average_sent': self.blank_sent,
                                 'average_delta': self.blank_sent,
                                 'num_data': 0}
-        self.c = Criterium(self.internal_variables)
+        self.c = Criterium(self.internal_variables, self.thresholds)
 
     def test_very_high(self):
         '''edgecases should round up'''
@@ -88,8 +88,9 @@ class TestReverseCalculation(unittest.TestCase):
 
 
 class Criterium:
-    def __init__(self, internal_variables):
+    def __init__(self, internal_variables, thresholds):
         self.internal_variables = internal_variables
+        self.thresholds = thresholds
 
     def calculate(self, val, thresholds=[.2, .4, .6, .8]):
         '''calculates val as very low, low, medium, high, or very high'''
