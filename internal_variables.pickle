@@ -11,10 +11,10 @@ p5
 F0.0
 sS'pos'
 p6
-F0.75
+F0.5
 sS'compound'
 p7
-F0.33030000000000004
+F0.2202
 ssS'last_sent'
 p8
 g3
@@ -26,9 +26,9 @@ F0.0
 sg5
 F0.0
 sg6
-F0.25
+F0.5
 sg7
-F0.11009999999999998
+F0.2202
 ssS'sum_delta'
 p11
 g3
