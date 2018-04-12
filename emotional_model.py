@@ -1,22 +1,24 @@
 import pickle
 import os.path
+import copy
 
 from em_r_novelty import *
 from em_relevance import *
 from em_implication import *
 
 
+# defines static variable blank_variables and blank_sent
+BLANK_SENT = {'neg': 0, 'pos':0, 'neu':0, 'compound': 0}
+BLANK_VARIABLES = {'current_sent': copy.deepcopy(BLANK_SENT),
+                        'last_sent': copy.deepcopy(BLANK_SENT),
+                        'delta_sent': copy.deepcopy(BLANK_SENT),
+                        'sum_sent': copy.deepcopy(BLANK_SENT),
+                        'sum_delta': copy.deepcopy(BLANK_SENT),
+                        'average_sent': copy.deepcopy(BLANK_SENT),
+                        'average_delta': copy.deepcopy(BLANK_SENT),
+                        'num_data': 0}
+
 class Emotion:
-    # defines static variable blank_variables and blank_sent
-    blank_sent = {'neg': 0, 'pos':0, 'neu':0, 'compound': 0}
-    blank_variables = {'current_sent': blank_sent,
-                            'last_sent': blank_sent,
-                            'delta_sent': blank_sent,
-                            'sum_sent': blank_sent,
-                            'sum_delta': blank_sent,
-                            'average_sent': blank_sent,
-                            'average_delta': blank_sent,
-                            'num_data': 0}
 
     def __init__(self, user_name, user_sent):
         self.user_name = user_name
@@ -26,6 +28,7 @@ class Emotion:
         # note: delta_sent is last delta_sent, new one will have to be calculated
 
         self.load_variables()
+        print self.internal_variables
 
         default_thres = [.2, .4, .6, .8]
         self.thresholds = {'suddenness': default_thres,
@@ -49,10 +52,8 @@ class Emotion:
     def load_variables(self):
         '''load pickle file with internal variables and store in attribute
         self.internal_variables'''
-        self.load_pickle_file(True)
-        #print 'CHK breakpt, blank_variables: ', Emotion.blank_variables
+        self.load_pickle_file()
         self.add_universal_variables()
-        print 'breakpt, blank_variables: ', Emotion.blank_variables
         self.add_user_variables()
 
     def load_pickle_file(self, overwrite=False):
@@ -61,11 +62,9 @@ class Emotion:
             self.internal_variables = pickle.load(open('internal_variables.pickle',
                                                         'rb'))
         else:
-            universal_variables = Emotion.blank_variables
-            # print 'CHK breakpt 1.125, blank_variables: ', Emotion.blank_variables
+            universal_variables = copy.deepcopy(BLANK_VARIABLES)
             user_variables = {}
             self.internal_variables = [universal_variables, user_variables]
-            #print 'CHK breakpt 1.2, blank_variables: ', Emotion.blank_variables
 
     def store_pickle_file(self):
         '''store internal_variables in pickle file'''
@@ -78,23 +77,13 @@ class Emotion:
 
     def add_universal_variables(self):
         # update universal_variables
-        #print 'CHK breakpt, blank_variables: ', Emotion.blank_variables
-        #universal_variables = self.internal_variables[0]
-        #print 'CHK breakpt, blank_variables: ', Emotion.blank_variables
         self.internal_variables[0]['current_sent'] = self.user_sent
-        print 'CURRENT breakpt, blank_variables: ', Emotion.blank_variables
         self.internal_variables[0]['num_data'] += 1
-
-        #self.internal_variables[0] = universal_variables
-        # print 'CHK breakpt 1: ', self.internal_variables[0]
 
     def add_user_variables(self):
         # check if user is in database, if not, make new user
         if self.user_name not in self.internal_variables[1]:
-            print 'breakpt 1.25, blank_variables: ', Emotion.blank_variables
-            self.internal_variables[1][self.user_name] = Emotion.blank_variables
-
-        print 'breakpt 1.5, user_variables: ', self.internal_variables[1]
+            self.internal_variables[1][self.user_name] = copy.deepcopy(BLANK_VARIABLES)
 
         # update user variables
         user_variables = self.internal_variables[1][self.user_name]
@@ -103,7 +92,6 @@ class Emotion:
         user_variables['num_data'] += 1
 
         self.internal_variables[1][self.user_name] = user_variables
-        print 'breakpt 2: ', self.internal_variables[1][self.user_name]
 
     def add_variables_end(self, variable_dict):
         '''modifies variable_dict as necessary before storing
@@ -119,9 +107,11 @@ class Emotion:
         average = variable_dict['average_sent']
         num = variable_dict['num_data']
         sum_ = variable_dict['sum_sent']
+        sum_delta = variable_dict['sum_delta']
 
         # store difference between current_sent and last_sent
         variable_dict['delta_sent'] = self.diff_sent(current, last)
+        delta = variable_dict['delta_sent']
 
         # update sum
         variable_dict['sum_sent'] = self.sum_sent(current, sum_)
@@ -130,18 +120,21 @@ class Emotion:
         # update average
         variable_dict['average_sent'] = self.average_sent(sum_, num)
 
+        # update sum delta
+        variable_dict['sum_delta'] = self.sum_sent(delta, sum_delta)
+
         # store current_sent as last_sent
         variable_dict['last_sent'] = variable_dict['current_sent']
 
         # changes current_sent to blank_sent
-        variable_dict['current_sent'] = Emotion.blank_sent
+        variable_dict['current_sent'] = copy.deepcopy(BLANK_SENT)
 
         return variable_dict
 
     def average_sent(self, sum_, num_data):
         '''Updates the average_sent given variable_dict'''
         # TODO: correct math using sum instead of average
-        average = Emotion.blank_sent
+        average = copy.deepcopy(BLANK_SENT)
 
         average['pos'] = sum_['pos']/num_data
 
@@ -156,10 +149,10 @@ class Emotion:
     def diff_sent(self, current, last):
         '''Takes difference of two different sentiment dictionaries'''
         diff = {}
-        diff['pos'] = last['pos'] - current['pos']
-        diff['neg'] = last['neg'] - current['neg']
-        diff['neu'] = last['neu'] - current['neu']
-        diff['compound'] = last['compound'] - current['compound']
+        diff['pos'] = current['pos'] - last['pos']
+        diff['neg'] = current['neg'] - last['neg']
+        diff['neu'] = current['neu'] - last['neu']
+        diff['compound'] = current['compound'] - last['compound']
 
         return diff
 
@@ -217,3 +210,4 @@ if __name__ == "__main__":
 
     model = Emotion(patient_name, patient_sentiment)
     em_critera = model.code_criteria()
+    print model.internal_variables
