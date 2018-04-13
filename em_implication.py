@@ -20,3 +20,10 @@ class Conduciveness:
 
     def code(self):
         pass
+
+class Urgency:
+    def __init__(self):
+        pass
+
+    def code(self):
+        pass

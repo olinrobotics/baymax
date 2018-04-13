@@ -48,6 +48,7 @@ class Emotion:
         # self.cm = Cause_Motive()
         # self.pr = Probability()
         # self.c = Conduciveness()
+        # self.c = Urgency()
 
     def load_variables(self):
         '''load pickle file with internal variables and store in attribute
@@ -188,6 +189,9 @@ class Emotion:
         return self.em_critera
 
     def interpret(self):
+        if self.em_critera['suddenness'] == 'very_low':
+        elif self.em_critera['suddenness'] == 'low':
+        elif self
         pass
 
 if __name__ == "__main__":
