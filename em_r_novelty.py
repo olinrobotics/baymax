@@ -36,6 +36,7 @@ class Suddenness(Criterium):
             'high': ['ELA/JOY', 'DESPAIR', 'FEAR', 'RAG/HOA']
             'very high': []
         }
+        all_possible = switcher.get(criterum_state, [])
 
 
 class Familiarity(Criterium):

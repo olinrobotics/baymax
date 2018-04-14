@@ -11,7 +11,7 @@ class TestCalculation(unittest.TestCase):
                                 'average_sent': self.blank_sent,
                                 'average_delta': self.blank_sent,
                                 'num_data': 0}
-        self.c = Criterium(self.internal_variables)
+        self.c = Criterium(self.internal_variables, self.thresholds)
 
     def test_very_low(self):
         pos = self.thresholds[0] - .01
@@ -87,6 +87,39 @@ class TestReverseCalculation(unittest.TestCase):
     #     self.c.dispose()
 
 
+class TestDownselect(unittest.TestCase):
+    def setUp(self):
+        self.thresholds = [.2, .4, .6, .8]
+        self.blank_sent = {'neg': 0, 'pos':0, 'neu':0, 'compound': 0}
+        self.blank_sent = {'neg': 0, 'pos':0, 'neu':0, 'compound': 0}
+        # note: delta_sent is last delta_sent, new one will have to be calculated
+        self.internal_variables = {'current_sent': self.blank_sent,
+                                'last_sent': self.blank_sent,
+                                'delta_sent': self.blank_sent,
+                                'average_sent': self.blank_sent,
+                                'average_delta': self.blank_sent,
+                                'num_data': 0}
+        self.c = Criterium(self.internal_variables, self.thresholds)
+
+    def test_no_common(self):
+        list1 = [1, 2, 3]
+        list2 = [4, 5, 6]
+        list3 = self.c.downselect(list1, list2)
+        self.assertTrue(list3 == [])
+
+    def test_all_common(self):
+        list1 = [1, 2, 3]
+        list2 = [1, 2, 3]
+        list3 = self.c.downselect(list1, list2)
+        self.assertTrue(list3 == [1, 2, 3])
+
+    def test_some_common(self):
+        list1 = [1, 2, 3]
+        list2 = [2, 3, 4]
+        list3 = self.c.downselect(list1, list2)
+        self.assertTrue(list3 == [2, 3])
+
+
 class Criterium:
     def __init__(self, internal_variables, thresholds):
         self.internal_variables = internal_variables
@@ -150,6 +183,13 @@ class Criterium:
                     else:
                         return 'very low'
 
+    def downselect(self, list1, list2):
+        '''downselects list2 to only the elements contiained in list1'''
+        downselect_list = []
+        for item in list1:
+            if item in list2:
+                downselect_list.append(item)
+        return downselect_list
 
 if __name__ == "__main__":
     unittest.main()

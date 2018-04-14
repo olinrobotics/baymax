@@ -57,6 +57,33 @@ class Emotion:
         self.add_universal_variables()
         self.add_user_variables()
 
+    def code_criteria(self):
+        '''Constructs dictionary of emotion critera
+        inputs:
+            pos: positivity from nltk sentiment analysis,
+            float between 0 and 1
+        output:
+            em_critera: dictionary with critera as keys'''
+
+        # calculate values for critera
+        predictability = self.p.code()
+        familiarity = self.f.code()
+        suddenness = self.s.code()
+
+        # create em_critera dictionary
+        self.em_critera = {'predictability': predictability,
+                           'familiarity': familiarity,
+                           'suddenness': suddenness}
+
+        # store internal_variables in pickle file
+        model.store_pickle_file()
+
+        return self.em_critera
+
+    def interpret(self):
+
+        pass
+
     def load_pickle_file(self, overwrite=False):
         # Load variables
         if os.path.exists('internal_variables.pickle') and overwrite == False:
@@ -165,34 +192,6 @@ class Emotion:
 
         return sum_
 
-    def code_criteria(self):
-        '''Constructs dictionary of emotion critera
-        inputs:
-            pos: positivity from nltk sentiment analysis,
-            float between 0 and 1
-        output:
-            em_critera: dictionary with critera as keys'''
-
-        # calculate values for critera
-        predictability = self.p.code()
-        familiarity = self.f.code()
-        suddenness = self.s.code()
-
-        # create em_critera dictionary
-        self.em_critera = {'predictability': predictability,
-                           'familiarity': familiarity,
-                           'suddenness': suddenness}
-
-        # store internal_variables in pickle file
-        model.store_pickle_file()
-
-        return self.em_critera
-
-    def interpret(self):
-        if self.em_critera['suddenness'] == 'very_low':
-        elif self.em_critera['suddenness'] == 'low':
-        elif self
-        pass
 
 if __name__ == "__main__":
     import nltk
