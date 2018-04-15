@@ -27,16 +27,18 @@ class Suddenness(Criterium):
     def interpret(self, criterum_state, possible_em):
         '''takes the argument criterum_state a list of current possible emotions
         and returns which of those are possible'''
-        # emotions that doen't change based on suddenness
+        # emotions that doesn't change based on suddenness
         independent_emotions = ['DISP/DISG', 'CON/SCO', 'GUIlT', 'PRIDE']
         switcher = {
-            'very low': ['BOR/IND']
-            'low': ['ENJ/HAP', 'SAD/DEJ', 'ANX/WOR', 'IRR/COA', 'SHAME']
-            'medium': ['ELA/JOY']
-            'high': ['ELA/JOY', 'DESPAIR', 'FEAR', 'RAG/HOA']
+            'very low': ['BOR/IND'],
+            'low': ['ENJ/HAP', 'SAD/DEJ', 'ANX/WOR', 'IRR/COA', 'SHAME'],
+            'medium': ['ELA/JOY'],
+            'high': ['ELA/JOY', 'DESPAIR', 'FEAR', 'RAG/HOA'],
             'very high': []
         }
-        all_possible = switcher.get(criterum_state, [])
+        all_possible = switcher.get(criterum_state) + independent_emotions
+
+        return self.downselect(possible_em, all_possible)
 
 
 class Familiarity(Criterium):

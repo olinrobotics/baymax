@@ -57,6 +57,15 @@ class Emotion:
         self.add_universal_variables()
         self.add_user_variables()
 
+    def interpret(self):
+        self.code_criteria()
+        possible_em = ['ENJ/HAP', 'ELA/JOY', 'DISP/DISG', 'CON/SCO', 'SAD/DEJ',
+                        'DESPAIR', 'ANX/WOR', 'FEAR', 'IRR/COA', 'RAG/HOA',
+                        'BOR/IND', 'SHAME', 'GUIlT', 'PRIDE']
+        print self.em_critera['suddenness']
+        possible_em = self.s.interpret(self.em_critera['suddenness'], possible_em)
+        print possible_em
+
     def code_criteria(self):
         '''Constructs dictionary of emotion critera
         inputs:
@@ -77,12 +86,6 @@ class Emotion:
 
         # store internal_variables in pickle file
         model.store_pickle_file()
-
-        return self.em_critera
-
-    def interpret(self):
-
-        pass
 
     def load_pickle_file(self, overwrite=False):
         # Load variables
@@ -212,5 +215,4 @@ if __name__ == "__main__":
     patient_sentiment = sid.polarity_scores(patient_status)
 
     model = Emotion(patient_name, patient_sentiment)
-    em_critera = model.code_criteria()
-    print model.internal_variables
+    em_critera = model.interpret()
