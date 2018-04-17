@@ -62,8 +62,9 @@ class Emotion:
         possible_em = ['ENJ/HAP', 'ELA/JOY', 'DISP/DISG', 'CON/SCO', 'SAD/DEJ',
                         'DESPAIR', 'ANX/WOR', 'FEAR', 'IRR/COA', 'RAG/HOA',
                         'BOR/IND', 'SHAME', 'GUIlT', 'PRIDE']
-        print self.em_critera['suddenness']
+        print self.em_critera
         possible_em = self.s.interpret(self.em_critera['suddenness'], possible_em)
+        possible_em = self.f.interpret(self.em_critera['familiarity'], possible_em)
         print possible_em
 
     def code_criteria(self):

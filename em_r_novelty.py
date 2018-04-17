@@ -26,8 +26,8 @@ class Suddenness(Criterium):
 
     def interpret(self, criterum_state, possible_em):
         '''takes the argument criterum_state a list of current possible emotions
-        and returns which of those are possible'''
-        # emotions that doesn't change based on suddenness
+        and returns which of those are possible given the criterium state'''
+        # emotions that don't change based on suddenness
         independent_emotions = ['DISP/DISG', 'CON/SCO', 'GUIlT', 'PRIDE']
         switcher = {
             'very low': ['BOR/IND'],
@@ -60,6 +60,23 @@ class Familiarity(Criterium):
         familiarity = self.reverse_calculate(delta_compound, self.thresholds)
 
         return familiarity
+
+    def interpret(self, criterium_state, possible_em):
+        '''takes the argument criterum_state a list of current possible emotions
+        and returns which of those are possible given the criterium state'''
+        # emotions that don't change based on familiarity
+        independent_emotions = ['ENJ/HAP', 'ELA/JOY', 'CON/SCO', 'ANX/WOR',
+                                'IRR/COA', 'SHAME', 'GUILT', 'PRIDE']
+        switcher = {
+            'very low': ['DESPAIR'],
+            'low': ['DISP/DISG', 'SAD/DEJ', 'FEAR', 'RAG/HOA'],
+            'medium': [],
+            'high': ['BOR/IND'],
+            'very high': []
+        }
+        all_possible = switcher.get(criterium_state) + independent_emotions
+
+        return self.downselect(possible_em, all_possible)
 
 
 class Predictability(Criterium):
