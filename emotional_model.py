@@ -6,6 +6,9 @@ from em_r_novelty import *
 from em_relevance import *
 from em_implication import *
 
+import nltk
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+
 
 # defines static variable blank_variables and blank_sent
 BLANK_SENT = {'neg': 0, 'pos':0, 'neu':0, 'compound': 0}
@@ -23,6 +26,7 @@ class Emotion:
     def __init__(self, user_name, user_sent):
         self.user_name = user_name
         self.user_sent = user_sent
+        print user_sent
 
 
         # note: delta_sent is last delta_sent, new one will have to be calculated
@@ -31,7 +35,7 @@ class Emotion:
         print self.internal_variables
 
         default_thres = [.2, .4, .6, .8]
-        self.thresholds = {'suddenness': default_thres,
+        self.thresholds = {'suddenness': [.4190, .83805, 1.2571, 1.6761],
                            'familiarity': default_thres,
                            'predictability': default_thres,
                            }
@@ -65,6 +69,7 @@ class Emotion:
         print self.em_critera
         possible_em = self.s.interpret(self.em_critera['suddenness'], possible_em)
         possible_em = self.f.interpret(self.em_critera['familiarity'], possible_em)
+        possible_em = self.p.interpret(self.em_critera['predictability'], possible_em)
         print possible_em
 
     def code_criteria(self):
@@ -198,10 +203,6 @@ class Emotion:
 
 
 if __name__ == "__main__":
-    import nltk
-    nltk.download('vader_lexicon')
-    from nltk.sentiment.vader import SentimentIntensityAnalyzer
-
     print "Hello, I'm Baymax, your personal healthcare companion"
 
     # Ask the patient for their name

@@ -99,3 +99,19 @@ class Predictability(Criterium):
         predictability = self.reverse_calculate(delta_compound, self.thresholds)
 
         return predictability
+
+    def interpret(self, criterium_state, possible_em):
+        '''takes the argument criterum_state a list of current possible emotions
+        and returns which of those are possible given the criterium state'''
+        # emotions that don't change based on predictability
+        independent_emotions = ['CON/SCO', 'SAD/DEJ', 'SHAME', 'GUILT', 'PRIDE']
+        switcher = {
+            'very low': [],
+            'low': ['ELA/JOY', 'DISP/DISG', 'DESPAIR', 'FEAR', 'RAG/HOA'],
+            'medium': ['ENJ/HAP', 'ANX/WOR', 'IRR/COA'],
+            'high': [],
+            'very high': ['BORD/IND']
+        }
+        all_possible = switcher.get(criterium_state) + independent_emotions
+
+        return self.downselect(possible_em, all_possible)
