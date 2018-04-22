@@ -72,6 +72,7 @@ class Emotion:
         possible_em = self.s.interpret(self.em_critera['suddenness'], possible_em)
         possible_em = self.f.interpret(self.em_critera['familiarity'], possible_em)
         possible_em = self.p.interpret(self.em_critera['predictability'], possible_em)
+        possible_em = self.gr.interpret(self.em_critera['goal relevance'], possible_em)
         print possible_em
 
     def code_criteria(self):
