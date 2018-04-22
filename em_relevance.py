@@ -9,8 +9,6 @@ class Pleasantness(Criterium):
 
 
 class Goal_Relevance(Criterium):
-    def __init__(self):
-        pass
 
     def code(self):
-        pass
+        return 'very high'
