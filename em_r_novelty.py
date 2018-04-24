@@ -1,12 +1,5 @@
 from em_criterium import *
 
-class Novelty(Criterium):
-    def __init__(self):
-        pass
-
-    def code(self):
-        pass
-
 
 class Suddenness(Criterium):
     def code(self):

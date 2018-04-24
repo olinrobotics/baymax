@@ -38,7 +38,8 @@ class Emotion:
         self.thresholds = {'suddenness': [.4190, .83805, 1.2571, 1.6761],
                            'familiarity': [.4190, .83805, 1.2571, 1.6761],
                            'predictability': [.4190, .83805, 1.2571, 1.6761],
-                           'goal_relevance': default_thres
+                           'goal_relevance': default_thres,
+                           'conduciveness': [-.8176, -.3371, .58265, .8585]
                            }
 
         self.s = Suddenness(self.internal_variables,
@@ -53,7 +54,8 @@ class Emotion:
                                  self.thresholds['goal_relevance'])
         # self.cm = Cause_Motive()
         # self.pr = Probability()
-        # self.c = Conduciveness()
+        self.c = Conduciveness(self.internal_variables,
+                               self.thresholds['conduciveness'])
         # self.c = Urgency()
 
     def load_variables(self):
@@ -88,12 +90,14 @@ class Emotion:
         familiarity = self.f.code()
         suddenness = self.s.code()
         goal_relevance = self.gr.code()
+        conduciveness = self.c.code()
 
         # create em_critera dictionary
         self.em_critera = {'suddenness': suddenness,
                            'predictability': predictability,
                            'familiarity': familiarity,
-                           'goal relevance': goal_relevance}
+                           'goal relevance': goal_relevance,
+                           'conduciveness': conduciveness}
 
         # store internal_variables in pickle file
         model.store_pickle_file()

@@ -1,3 +1,5 @@
+from em_criterium import *
+
 class Cause_Motive:
     def __init__(self):
         pass
@@ -14,12 +16,15 @@ class Probability:
         pass
 
 
-class Conduciveness:
-    def __init__(self):
-        pass
-
+class Conduciveness(Criterium):
     def code(self):
-        pass
+        # defines current compound score
+        current_compound = self.internal_variables[0]['current_sent']['compound']
+
+        # calculates conduciveness as very low, low, medium, high, or very high
+        conduciveness = self.calculate(current_compound, self.thresholds)
+
+        return conduciveness
 
 class Urgency:
     def __init__(self):
