@@ -21,13 +21,13 @@ class Suddenness(Criterium):
         '''takes the argument criterum_state a list of current possible emotions
         and returns which of those are possible given the criterium state'''
         # emotions that don't change based on suddenness
-        independent_emotions = ['DISP/DISG', 'CON/SCO', 'GUIlT', 'PRIDE']
+        independent_emotions = ['DISP/DISG', 'CON/SCO', 'BOR/IND', 'SHAME']
         switcher = {
-            'very low': ['BOR/IND'],
-            'low': ['ENJ/HAP', 'SAD/DEJ', 'ANX/WOR', 'IRR/COA', 'SHAME'],
-            'medium': ['ELA/JOY'],
-            'high': ['ELA/JOY', 'DESPAIR', 'FEAR', 'RAG/HOA'],
-            'very high': []
+            'very low': ['DESPAIR', 'FEAR', 'RAG/HOA'],
+            'low': ['SAD/DEJ', 'ANX/WOR', 'IRR/COA'],
+            'medium': [],
+            'high': ['ENJ/HAP', 'GUILT'],
+            'very high': ['ELA/JOY', 'PRIDE']
         }
         all_possible = switcher.get(criterum_state) + independent_emotions
 

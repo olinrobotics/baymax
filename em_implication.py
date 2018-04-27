@@ -26,6 +26,22 @@ class Conduciveness(Criterium):
 
         return conduciveness
 
+    def interpret(self):
+        '''takes the argument criterum_state a list of current possible emotions
+        and returns which of those are possible given the criterium state'''
+        independent_emotions = ['DISP/DISG', 'CON/SCO', 'GUIlT', 'PRIDE']
+        switcher = {
+            'very low': [],
+            'low': ['DISP/DISG', 'CON/SCO', 'BOR/IND'],
+            'medium': ['ENJ/HAP', 'ANX/WOR', 'IRR/COA'],
+            'high': ['ELA/JOY', 'SAD/DEJ', 'DESPAIR', 'FEAR', 'RAG/HOA',
+                     'SHAME', 'GUILT', 'PRIDE'],
+            'very high': []
+        }
+        all_possible = switcher.get(criterum_state)
+
+        return self.downselect(possible_em, all_possible)
+
 class Urgency:
     def __init__(self):
         pass

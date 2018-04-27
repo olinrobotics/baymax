@@ -13,26 +13,22 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 # defines static variable blank_variables and blank_sent
 BLANK_SENT = {'neg': 0, 'pos':0, 'neu':0, 'compound': 0}
 BLANK_VARIABLES = {'current_sent': copy.deepcopy(BLANK_SENT),
-                        'last_sent': copy.deepcopy(BLANK_SENT),
-                        'delta_sent': copy.deepcopy(BLANK_SENT),
-                        'sum_sent': copy.deepcopy(BLANK_SENT),
-                        'sum_delta': copy.deepcopy(BLANK_SENT),
-                        'average_sent': copy.deepcopy(BLANK_SENT),
-                        'average_delta': copy.deepcopy(BLANK_SENT),
-                        'num_data': 0}
+                    'last_sent': copy.deepcopy(BLANK_SENT),
+                    'delta_sent': copy.deepcopy(BLANK_SENT),
+                    'sum_sent': copy.deepcopy(BLANK_SENT),
+                    'sum_delta': copy.deepcopy(BLANK_SENT),
+                    'average_sent': copy.deepcopy(BLANK_SENT),
+                    'average_delta': copy.deepcopy(BLANK_SENT),
+                    'num_data': 0}
 
 class Emotion:
 
     def __init__(self, user_name, user_sent):
         self.user_name = user_name
         self.user_sent = user_sent
-        print user_sent
-
-
         # note: delta_sent is last delta_sent, new one will have to be calculated
 
         self.load_variables()
-        print self.internal_variables
 
         default_thres = [.2, .4, .6, .8]
         self.thresholds = {'suddenness': [.4190, .83805, 1.2571, 1.6761],
@@ -102,7 +98,7 @@ class Emotion:
         # store internal_variables in pickle file
         model.store_pickle_file()
 
-    def load_pickle_file(self, overwrite=False):
+    def load_pickle_file(self, overwrite=True):
         # Load variables
         if os.path.exists('internal_variables.pickle') and overwrite == False:
             self.internal_variables = pickle.load(open('internal_variables.pickle',
@@ -114,7 +110,7 @@ class Emotion:
 
     def store_pickle_file(self):
         '''store internal_variables in pickle file'''
-        # TODO:  analysis of sent and user
+        # TODO: analysis of sent and user
         # store in pickle file
         self.internal_variables[0] = self.add_variables_end(self.internal_variables[0])
         self.internal_variables[1][self.user_name] = self.add_variables_end(self.internal_variables[1][self.user_name])
